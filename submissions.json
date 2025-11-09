@@ -1,0 +1,31 @@
+{
+  "submissions": [
+    {
+      "id": 1,
+      "customerName": "John Doe",
+      "productName": "Widget A",
+      "country": "USA",
+      "rate": 25.50,
+      "status": "rejected",
+      "submittedAt": "2024-11-09T10:30:00Z"
+    },
+    {
+      "id": 2,
+      "customerName": "Jane Smith",
+      "productName": "Widget B",
+      "country": "Canada",
+      "rate": 65.75,
+      "status": "approved",
+      "submittedAt": "2024-11-08T14:15:00Z"
+    },
+    {
+      "id": 3,
+      "customerName": "Mike Johnson",
+      "productName": "Service Package",
+      "country": "UK",
+      "rate": 45.00,
+      "status": "rejected",
+      "submittedAt": "2024-11-07T09:20:00Z"
+    }
+  ]
+}

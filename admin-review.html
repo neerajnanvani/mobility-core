@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Review - Rate Management System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <img src="tata_com.jpg" alt="Tata Company Logo">
+            </div>
+            <div class="logout-section">
+                <p class="user-info">Logged in as Admin</p>
+                <a href="#" onclick="logout()" class="logout-btn">Logout</a>
+            </div>
+            <h1>Admin Review Dashboard</h1>
+            <p>Review and manage customer rate submissions</p>
+        </div>
+        
+        <div class="content">
+            <div id="message" class="message" style="display: none;"></div>
+            
+            <div style="margin-bottom: 20px; text-align: center;">
+                <button class="btn" onclick="refreshData()">Refresh Data</button>
+            </div>
+            
+            <div class="table-container">
+                <table id="submissionsTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Customer Name</th>
+                            <th>Product Name</th>
+                            <th>Country</th>
+                            <th>Rate (USD)</th>
+                            <th>Status</th>
+                            <th>Submitted Date</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="submissionsBody">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="submissionDetails" style="display: none; margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                <h3>Submission Details</h3>
+                <div id="detailsContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load submissions data
+        let submissionsData = null;
+        let currentFilter = 'all';
+
+        // Simulate loading JSON data
+        async function loadSubmissionsData() {
+            let isFromLocalStorage = false;
+            try {
+                // Try to load from localStorage first (for demo)
+                const localData = localStorage.getItem('submissions');
+                if (localData) {
+                    submissionsData = JSON.parse(localData);
+                    isFromLocalStorage = true;
+                } else {
+                    const response = await fetch('submissions.json');
+                    submissionsData = await response.json();
+                }
+            } catch (error) {
+                console.error('Error loading submissions data:', error);
+                // Fallback data
+                submissionsData = {
+                    "submissions": [
+                        {
+                            "id": 1,
+                            "customerName": "John Doe",
+                            "productName": "Widget A",
+                            "country": "USA",
+                            "rate": 25.50,
+                            "status": "rejected",
+                            "submittedAt": "2024-11-09T10:30:00Z"
+                        },
+                        {
+                            "id": 2,
+                            "customerName": "Jane Smith",
+                            "productName": "Widget B",
+                            "country": "Canada",
+                            "rate": 65.75,
+                            "status": "approved",
+                            "submittedAt": "2024-11-08T14:15:00Z"
+                        }
+                    ]
+                };
+            }
+            renderTable();
+        }
+
+        // Check if user is logged in as admin
+        window.addEventListener('load', function() {
+            const userType = localStorage.getItem('userType');
+            
+            if (userType !== 'admin') {
+                alert('Please log in as an admin to access this page.');
+                window.location.href = 'admin-login.html';
+                return;
+            }
+            
+            loadSubmissionsData();
+        });
+
+        // Render submissions table
+        function renderTable() {
+            const tbody = document.getElementById('submissionsBody');
+            const filteredSubmissions = submissionsData.submissions;
+            
+            tbody.innerHTML = '';
+            
+            if (filteredSubmissions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">No submissions found</td></tr>';
+                return;
+            }
+            
+            filteredSubmissions.forEach(submission => {
+                const row = document.createElement('tr');
+                const formattedDate = new Date(submission.submittedAt).toLocaleDateString();
+                
+                row.innerHTML = `
+                    <td>${submission.id}</td>
+                    <td>${submission.customerName}</td>
+                    <td>${submission.productName}</td>
+                    <td>${submission.country}</td>
+                    <td>$${submission.rate.toFixed(2)}</td>
+                    <td><span class="status ${submission.status}">${submission.status.toUpperCase()}</span></td>
+                    <td>${formattedDate}</td>
+                    <td>
+                        <button class="btn" onclick="showDetails(${submission.id})" style="padding: 5px 10px; font-size: 12px;">View Details</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Show submission details
+        function showDetails(submissionId) {
+            const submission = submissionsData.submissions.find(s => s.id === submissionId);
+            if (submission) {
+                const detailsDiv = document.getElementById('submissionDetails');
+                const contentDiv = document.getElementById('detailsContent');
+                
+                let analysisInfo = '';
+                if (submission.analysis) {
+                    analysisInfo = `
+                        <p><strong>Rate Analysis:</strong></p>
+                        <ul>
+                            <li>Category: ${submission.analysis.category}</li>
+                            <li>Rate: $${submission.analysis.rate}</li>
+                            <li>Result: ${submission.analysis.recommendation}</li>
+                        </ul>
+                    `;
+                }
+                
+                contentDiv.innerHTML = `
+                    <p><strong>Submission ID:</strong> ${submission.id}</p>
+                    <p><strong>Customer:</strong> ${submission.customerName}</p>
+                    <p><strong>Product:</strong> ${submission.productName}</p>
+                    <p><strong>Country:</strong> ${submission.country}</p>
+                    <p><strong>Rate:</strong> $${submission.rate.toFixed(2)}</p>
+                    <p><strong>Status:</strong> <span class="status ${submission.status}">${submission.status.toUpperCase()}</span></p>
+                    <p><strong>Submitted:</strong> ${new Date(submission.submittedAt).toLocaleString()}</p>
+                    ${analysisInfo}
+                    <button class="btn" onclick="hideDetails()" style="margin-top: 10px;">Close</button>
+                `;
+                
+                detailsDiv.style.display = 'block';
+            }
+        }
+
+        // Hide details
+        function hideDetails() {
+            document.getElementById('submissionDetails').style.display = 'none';
+        }
+
+        // Refresh data
+        function refreshData() {
+            loadSubmissionsData();
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = 'message success';
+            messageDiv.textContent = 'Data refreshed successfully!';
+            messageDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 2000);
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('userType');
+            localStorage.removeItem('userEmail');
+            window.location.href = 'admin-login.html';
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            if (document.visibilityState === 'visible') {
+                loadSubmissionsData();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "customers": [
+    {
+      "email": "customer1@example.com",
+      "password": "password123"
+    },
+    {
+      "email": "customer2@example.com",
+      "password": "password456"
+    }
+  ],
+  "admins": [
+    {
+      "email": "admin1@example.com",
+      "password": "admin123"
+    },
+    {
+      "email": "admin2@example.com",
+      "password": "admin456"
+    }
+  ]
+}

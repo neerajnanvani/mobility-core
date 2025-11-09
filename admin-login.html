@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Rate Management System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <img src="tata_com.jpg" alt="Tata Company Logo">
+            </div>
+            <h1>Admin Login</h1>
+            <p>Enter your admin credentials to access the review dashboard</p>
+        </div>
+        
+        <div class="nav">
+            <div class="nav-links">
+                <a href="customer-login.html">Customer Login</a>
+                <a href="admin-login.html">Admin Login</a>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="login-form">
+                <div id="message" class="message" style="display: none;"></div>
+                
+                <form id="adminLoginForm">
+                    <div class="form-group">
+                        <label for="email">Email ID:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn">Login</button>
+                    </div>
+                </form>
+                
+                <div style="margin-top: 20px; text-align: center;">
+                    <p><strong>Demo Admin Credentials:</strong></p>
+                    <p>Email: admin1@example.com | Password: admin123</p>
+                    <p>Email: admin2@example.com | Password: admin456</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load users data
+        let usersData = null;
+
+        // Simulate loading JSON data (in a real app, this would be an API call)
+        async function loadUsersData() {
+            try {
+                const response = await fetch('users.json');
+                usersData = await response.json();
+            } catch (error) {
+                console.error('Error loading users data:', error);
+                // Fallback data if JSON file can't be loaded
+                usersData = {
+                    "customers": [
+                        {"email": "customer1@example.com", "password": "password123"},
+                        {"email": "customer2@example.com", "password": "password456"}
+                    ],
+                    "admins": [
+                        {"email": "admin1@example.com", "password": "admin123"},
+                        {"email": "admin2@example.com", "password": "admin456"}
+                    ]
+                };
+            }
+        }
+
+        // Initialize
+        loadUsersData();
+
+        // Handle form submission
+        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('message');
+            
+            // Check credentials
+            const admin = usersData.admins.find(a => a.email === email && a.password === password);
+            
+            if (admin) {
+                // Store login status
+                localStorage.setItem('userType', 'admin');
+                localStorage.setItem('userEmail', email);
+                
+                messageDiv.className = 'message success';
+                messageDiv.textContent = 'Login successful! Redirecting to admin dashboard...';
+                messageDiv.style.display = 'block';
+                
+                // Redirect to admin review table
+                setTimeout(() => {
+                    window.location.href = 'admin-review.html';
+                }, 1500);
+            } else {
+                messageDiv.className = 'message error';
+                messageDiv.textContent = 'Invalid admin credentials. Please try again.';
+                messageDiv.style.display = 'block';
+            }
+        });
+
+        // Auto-hide message after 5 seconds
+        function autoHideMessage() {
+            const messageDiv = document.getElementById('message');
+            if (messageDiv.style.display !== 'none') {
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Check if already logged in
+        window.addEventListener('load', function() {
+            const userType = localStorage.getItem('userType');
+            if (userType === 'admin') {
+                window.location.href = 'admin-review.html';
+            }
+        });
+    </script>
+</body>
+</html>

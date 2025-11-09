@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rate Management System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <img src="tata_com.jpg" alt="Tata Company Logo">
+            </div>
+            <h1>Rate Management System</h1>
+            <p>Welcome to the Rate Management System</p>
+        </div>
+        
+        <div class="content">
+            <div style="text-align: center; max-width: 600px; margin: 0 auto;">
+                <h2>Choose Your Login Type</h2>
+                <p style="margin: 20px 0; color: #666;">Select whether you want to log in as a customer to submit rates or as an admin to review submissions.</p>
+                
+                <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin: 40px 0;">
+                    <a href="customer-login.html" class="btn" style="padding: 20px 30px; text-decoration: none;">
+                        <div>
+                            <h3 style="margin: 0 0 10px 0;">Customer Login</h3>
+                            <p style="margin: 0; font-size: 14px; opacity: 0.8;">Submit product rates for review</p>
+                        </div>
+                    </a>
+                    
+                    <a href="admin-login.html" class="btn" style="padding: 20px 30px; text-decoration: none;">
+                        <div>
+                            <h3 style="margin: 0 0 10px 0;">Admin Login</h3>
+                            <p style="margin: 0; font-size: 14px; opacity: 0.8;">Review and manage submissions</p>
+                        </div>
+                    </a>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 40px 0;">
+                    <h3>Demo Credentials</h3>
+                    <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 15px;">
+                        <div style="text-align: left;">
+                            <h4>Customer Accounts:</h4>
+                            <p style="margin: 5px 0;">Email: customer1@example.com<br>Password: password123</p>
+                            <p style="margin: 5px 0;">Email: customer2@example.com<br>Password: password456</p>
+                        </div>
+                        <div style="text-align: left;">
+                            <h4>Admin Accounts:</h4>
+                            <p style="margin: 5px 0;">Email: admin1@example.com<br>Password: admin123</p>
+                            <p style="margin: 5px 0;">Email: admin2@example.com<br>Password: admin456</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; text-align: left;">
+                    <h3>How It Works</h3>
+                    <ol style="margin: 15px 0;">
+                        <li><strong>Customer Flow:</strong> Login → Submit rate with product details → View automatic approval/rejection based on market analysis</li>
+                        <li><strong>Admin Flow:</strong> Login → Review all submissions → Approve or reject pending rates → View detailed analysis</li>
+                        <li><strong>Rate Analysis:</strong> System automatically compares submitted rates against market rates by country</li>
+                        <li><strong>Data Storage:</strong> All submissions are stored locally in JSON format for demo purposes</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Clear any existing login sessions when visiting home page
+        // This allows users to start fresh
+        const clearSession = new URLSearchParams(window.location.search).get('clear');
+        if (clearSession === 'true') {
+            localStorage.removeItem('userType');
+            localStorage.removeItem('userEmail');
+        }
+        
+        // Auto-redirect if already logged in
+        window.addEventListener('load', function() {
+            const userType = localStorage.getItem('userType');
+            
+            if (userType === 'customer') {
+                window.location.href = 'customer-form.html';
+            } else if (userType === 'admin') {
+                window.location.href = 'admin-review.html';
+            }
+        });
+    </script>
+</body>
+</html>

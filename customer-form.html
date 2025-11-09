@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Form - Rate Management System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <img src="tata_com.jpg" alt="Tata Company Logo">
+            </div>
+            <div class="logout-section">
+                <p class="user-info">Logged in as Customer</p>
+                <a href="#" onclick="logout()" class="logout-btn">Logout</a>
+            </div>
+            <h1>Rate Submission Form</h1>
+            <p>Submit your product rate for review</p>
+        </div>
+        
+        <div class="content">
+            <div id="message" class="message" style="display: none;"></div>
+            
+            <form id="customerForm">
+                <div class="form-group">
+                    <label for="customerName">Customer Name:</label>
+                    <input type="text" id="customerName" name="customerName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="productName">Product Name:</label>
+                    <input type="text" id="productName" name="productName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="country">Country:</label>
+                    <select id="country" name="country" required>
+                        <option value="">Select Country</option>
+                        <option value="USA">United States</option>
+                        <option value="Canada">Canada</option>
+                        <option value="UK">United Kingdom</option>
+                        <option value="Germany">Germany</option>
+                        <option value="France">France</option>
+                        <option value="Japan">Japan</option>
+                        <option value="Australia">Australia</option>
+                        <option value="India">India</option>
+                        <option value="China">China</option>
+                        <option value="Brazil">Brazil</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="rate">Rate (USD):</label>
+                    <input type="number" id="rate" name="rate" step="0.01" min="0" required>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn">Submit for Review</button>
+                </div>
+            </form>
+            
+            <div id="submissionResult" style="margin-top: 30px; padding: 20px; border-radius: 8px; display: none;">
+                <h3>Submission Successful!</h3>
+                <div id="submissionDetails"></div>
+                <div style="margin-top: 20px;">
+                    <button class="btn" onclick="submitAnotherRate()">Submit Another Rate</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load submissions data
+        let submissionsData = null;
+
+        // Simulate loading JSON data
+        async function loadSubmissionsData() {
+            try {
+                const response = await fetch('submissions.json');
+                submissionsData = await response.json();
+            } catch (error) {
+                console.error('Error loading submissions data:', error);
+                // Fallback data
+                submissionsData = {
+                    "submissions": [
+                        {
+                            "id": 1,
+                            "customerName": "John Doe",
+                            "productName": "Widget A",
+                            "country": "USA",
+                            "rate": 25.50,
+                            "status": "pending",
+                            "submittedAt": "2024-11-09T10:30:00Z"
+                        }
+                    ]
+                };
+            }
+        }
+
+        // Initialize
+        loadSubmissionsData();
+
+        // Check if user is logged in
+        window.addEventListener('load', function() {
+            const userType = localStorage.getItem('userType');
+            const userEmail = localStorage.getItem('userEmail');
+            
+            if (userType !== 'customer') {
+                alert('Please log in as a customer to access this page.');
+                window.location.href = 'customer-login.html';
+                return;
+            }
+            
+            // Pre-fill email if available
+            if (userEmail) {
+                document.getElementById('customerName').value = userEmail.split('@')[0];
+            }
+        });
+
+        // Rate calculation and analysis
+        function analyzeRate(rate, country) {
+            // Simple logic: >= 50 approved, < 50 rejected
+            let status, category, recommendation;
+            
+            if (rate >= 50) {
+                status = "approved";
+                category = "Approved Rate";
+                recommendation = "Rate is 50 or above - APPROVED";
+            } else {
+                status = "rejected";
+                category = "Rejected Rate";
+                recommendation = "Rate is below 50 - REJECTED";
+            }
+            
+            return {
+                category,
+                recommendation,
+                status,
+                rate: rate.toFixed(2)
+            };
+        }
+
+        // Handle form submission
+        document.getElementById('customerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const customerName = formData.get('customerName');
+            const productName = formData.get('productName');
+            const country = formData.get('country');
+            const rate = parseFloat(formData.get('rate'));
+            const messageDiv = document.getElementById('message');
+            
+            // Perform rate analysis
+            const analysis = analyzeRate(rate, country);
+            
+            // Hide the form
+            document.getElementById('customerForm').style.display = 'none';
+            
+            // Create new submission
+            const newSubmission = {
+                id: Date.now(), // Simple ID generation
+                customerName,
+                productName,
+                country,
+                rate,
+                status: analysis.status, // approved or rejected based on rate >= 50
+                submittedAt: new Date().toISOString(),
+                analysis: analysis
+            };
+            
+            // Add to submissions (in real app, this would be sent to server)
+            submissionsData.submissions.push(newSubmission);
+            
+            // Save to localStorage for demo purposes
+            localStorage.setItem('submissions', JSON.stringify(submissionsData));
+            
+            // Show submission result
+            const submissionResultDiv = document.getElementById('submissionResult');
+            const submissionDetailsDiv = document.getElementById('submissionDetails');
+            
+            // Style the result based on status
+            if (newSubmission.status === 'approved') {
+                submissionResultDiv.style.background = '#d1edff';
+                submissionResultDiv.style.border = '2px solid #51cf66';
+                submissionResultDiv.style.color = '#0c5460';
+            } else {
+                submissionResultDiv.style.background = '#f8d7da';
+                submissionResultDiv.style.border = '2px solid #ff6b6b';
+                submissionResultDiv.style.color = '#721c24';
+            }
+            
+            submissionDetailsDiv.innerHTML = `
+                <div style="background: white; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                    <h4>Submission Details:</h4>
+                    <p><strong>Customer Name:</strong> ${customerName}</p>
+                    <p><strong>Product Name:</strong> ${productName}</p>
+                    <p><strong>Country:</strong> ${country}</p>
+                    <p><strong>Rate:</strong> $${rate.toFixed(2)}</p>
+                    <p><strong>Status:</strong> <span class="status ${newSubmission.status}" style="padding: 6px 12px; margin-left: 10px;">${newSubmission.status.toUpperCase()}</span></p>
+                    <p><strong>Submitted:</strong> ${new Date(newSubmission.submittedAt).toLocaleString()}</p>
+                </div>
+            `;
+            
+            submissionResultDiv.style.display = 'block';
+            
+            // Hide any previous messages
+            messageDiv.style.display = 'none';
+        });
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('userType');
+            localStorage.removeItem('userEmail');
+            window.location.href = 'customer-login.html';
+        }
+
+        // Submit another rate function
+        function submitAnotherRate() {
+            // Reset and show the form
+            document.getElementById('customerForm').reset();
+            document.getElementById('customerForm').style.display = 'block';
+            document.getElementById('submissionResult').style.display = 'none';
+            
+            // Pre-fill customer name if available
+            const userEmail = localStorage.getItem('userEmail');
+            if (userEmail) {
+                document.getElementById('customerName').value = userEmail.split('@')[0];
+            }
+        }
+    </script>
+</body>
+</html>
